@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# usage: shoot <url> <out-dir>
+# Screenshots the whole page, one screen at a time, at desktop and phone widths.
+set -euo pipefail
+url=$1 out=$2
+s="crit-$$"
+mkdir -p "$out"
+for size in desktop:1440x900 phone:390x844; do
+  name=${size%%:*} dims=${size#*:} w=${dims%x*} h=${dims#*x}
+  agent-browser --session "$s" set viewport "$w" "$h" >/dev/null
+  agent-browser --session "$s" open "$url" >/dev/null
+  agent-browser --session "$s" wait 2500 >/dev/null
+  total=$(agent-browser --session "$s" eval 'document.documentElement.scrollHeight' | tr -dc 0-9)
+  i=0 y=0
+  while (( y < total && i < 30 )); do
+    agent-browser --session "$s" eval "window.scrollTo(0,$y)" >/dev/null
+    agent-browser --session "$s" wait 900 >/dev/null
+    agent-browser --session "$s" screenshot "$out/$name-$(printf %02d $i).png" >/dev/null
+    i=$((i+1)) y=$((y+h-100))
+  done
+done
+agent-browser --session "$s" close >/dev/null
+ls "$out"
