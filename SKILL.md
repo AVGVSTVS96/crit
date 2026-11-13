@@ -1,14 +1,19 @@
 ---
 name: crit
-description: Get an honest read on a visual design from two independent judges, Claude Opus through Claude Code and GPT Sol through Codex. Use to check UI work before calling it done, on a web page or on screenshots of an app.
+description: Review a UI with two independent judges, Claude Opus through Claude Code and GPT Sol through Codex, then check what they say and compare before and after a change. Use on a web page or app screenshots before calling UI work done.
 ---
 
 # crit
 
-Two judges review the same screenshots with the same plain prompt, `review.md`, and score each screen and the whole. Each sees only the screenshots and the prompt, so what they say is their own read.
+```text
+shoot → judge → check → report → change → compare
+```
 
-1. **Screenshots.** For a web page, `scripts/shoot <url> <dir>` captures the whole page one screen at a time, at 1440px and 390px wide (needs [agent-browser](https://github.com/vercel-labs/agent-browser)). For an app, put its screenshots in a folder, named in the order they should be read.
-2. **Judges.** `scripts/judge "<url or what it is>" <dir> <out-dir>` runs both at once and writes `opus.md` and `sol.md`. It takes a few minutes.
-3. **Report.** Give each judge's overall score and biggest points, where they agree and where they split. Pass their verdicts on as they wrote them: they're there to see what the builder can't.
+1. **Shoot.** `scripts/shoot <url> <dir>` screenshots the whole page one screen at a time at 1440px and 390px, and writes `styles.md`: every font size, weight, family and color it renders. For an app, put its screenshots in a folder in reading order, and a `styles.md` if you can get one.
+2. **Judge.** `scripts/judge "<what it is>" "<what people come to do>" <out> <dir>` runs both judges at medium effort and writes `opus.md` and `sol.md`. They get the screenshots, `styles.md` and `review.md`, nothing else: no settings, memories or instruction files. Say what people come to do in their words, and keep out what changed or what you hope to hear.
+3. **Check.** Hold each claim that matters against the screenshots, `styles.md` and the source. Drop what doesn't hold; mark what screenshots can't settle.
+4. **Report.** Lead with the verdict. Put both judges' ratings side by side and show where they split rather than averaging. Then the checked findings, biggest first, each with its screenshot attached. Show the screenshots, not just text.
+5. **Change.** Fix up to three related findings, then shoot again.
+6. **Compare.** `scripts/judge "<what it is>" "<what people come to do>" <out> <before> <after>` shows both versions as A and B in a random order; `key.txt` says which is which. Record better, same, worse or can't tell, and anything that got worse.
 
-The judges get the screenshots and `review.md`, nothing else. What changed, what the page is for, or what you hope to hear would steer them.
+Stop after three rounds, or sooner when another round has nothing concrete to gain.
