@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# usage: rank <out-dir> <design>...
+# Each design is a screenshot or a folder of them (its desktop-*.png, if any).
+# Both judges rank them blind as A, B, C… in a shuffled order; key.txt says
+# which is which, and ranking.md has each judge's ranking with names put back.
+set -euo pipefail
+shopt -s nullglob
+out=$(realpath -m "$1"); shift
+here=$(dirname "$(realpath "$0")")/..
+packet="$out/packet"
+rm -rf "$packet"; mkdir -p "$packet"
+
+letters=({A..Z}) i=0
+: > "$out/key.txt"
+while read -r design; do
+  l=${letters[i++]}
+  if [[ -d $design ]]; then
+    shots=("$design"/desktop-*.png); (( ${#shots[@]} )) || shots=("$design"/*.png)
+  else shots=("$design"); fi
+  n=0; for f in "${shots[@]}"; do cp "$f" "$packet/$l-$(printf %02d $n).png"; n=$((n+1)); done
+  echo "$l: $design" >> "$out/key.txt"
+done < <(printf '%s\n' "$@" | shuf)
+
+text=$(sed -e "s|{{n}}|$#|" -e "s|{{last}}|${letters[$#-1]}|" "$here/rank.md")
+text+=$'\n\nScreenshots, in order:\n'"$(ls "$packet")"
+"$here/scripts/panel" "$packet" "$out" "$text"
+
+for judge in opus sol; do
+  line=$(rg -o '^\**Ranking:?\**:? *(.*)$' -r '$1' "$out/$judge.md" | tail -1 || true)
+  echo "$judge: $(awk 'NR==FNR { sub(":", "", $1); name[$1] = $2; next }
+    { for (i = 1; i <= NF; i++) if ($i in name) $i = name[$i]; print }' "$out/key.txt" - <<< "${line:-no ranking line}")"
+done > "$out/ranking.md"
+cat "$out/ranking.md"

@@ -1,6 +1,6 @@
 ---
 name: crit
-description: Review a UI with two independent judges, Claude Opus through Claude Code and GPT Sol through Codex, then check what they say and compare before and after a change. Use on a web page or app screenshots before calling UI work done.
+description: Review a UI with two independent judges, Claude Opus through Claude Code and GPT Sol through Codex, then check what they say, compare before and after a change, and rank designs blind. Use on a web page or app screenshots before calling UI work done.
 ---
 
 # crit
@@ -15,5 +15,7 @@ shoot → judge → check → report → change → compare
 4. **Report.** Lead with the verdict. Put both judges' ratings side by side and show where they split rather than averaging. Then the checked findings, biggest first, each with its screenshot attached. Show the screenshots, not just text.
 5. **Change.** Fix up to three related findings, then shoot again.
 6. **Compare.** `scripts/judge "<what it is>" "<what people come to do>" <out> <before> <after>` shows both versions as A and B in a random order; `key.txt` says which is which. Record better, same, worse or can't tell, and anything that got worse.
+
+7. **Rank.** `scripts/rank <out> <design>...` has both judges rank designs best to worst, blind, with how far apart each pair is: `>` close, `>>` a clear step, `>>>` far. A design is a screenshot or a shots folder (its desktop screens). Use it to pick among directions, or pass single screenshots to find a page's strongest and weakest screens. Rank like with like: a dashboard against marketing pages gets judged on different terms. `key.txt` says which letter was which; `ranking.md` has both rankings with names put back. Ratings drift toward 2 and 3; ranking is how to tell designs apart.
 
 Stop after three rounds, or sooner when another round has nothing concrete to gain.
